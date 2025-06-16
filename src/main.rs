@@ -18,7 +18,6 @@ impl RequestV2 {
         let request_api_version = u16::from_be_bytes(bytes[6..8].try_into().unwrap());
         let correlation_id = i32::from_be_bytes(bytes[8..12].try_into().unwrap());
         
-        // Assuming client_id and tag_buffer are not used in this example
         RequestV2 {
             message_size,
             request_api_key,
@@ -29,7 +28,7 @@ impl RequestV2 {
 }
 
 struct ResponseV0 {
-    message_size: u32, // Placeholder for message size
+    message_size: u32,
     correlation_id: i32,
     // tag_buffer: Vec<u8>
 }
