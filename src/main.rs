@@ -87,9 +87,14 @@ struct ApiVersion {
 
 fn handle_connection(stream: &mut std::net::TcpStream) {
     let mut buffer = [0; 1024];
-    match stream.read(&mut buffer) {
-        Ok(size) => {
-            if size > 0 {
+    
+    loop {
+        match stream.read(&mut buffer) {
+            Ok(0) => {
+                println!("Client disconnected");
+                break;
+            }
+            Ok(size) => {
                 let request = RequestV2::from_bytes(&buffer[..size]);
                 println!("Received request: {:?}", request);
 
@@ -98,19 +103,22 @@ fn handle_connection(stream: &mut std::net::TcpStream) {
                 if ![0,1,2,3,4].contains(&request.request_api_version) {
                     response.error_code = 35;
                 }
-
                 response.set_size();
                 // Send the response back
                 println!("Sending response: {:?}", response);
                 let response_bytes = response.to_bytes();
-                stream.write_all(&response_bytes).unwrap();
+                
+                if let Err(e) = stream.write_all(&response_bytes) {
+                    println!("Failed to write response: {}", e);
+                    break;
+                }
+            }
+            Err(e) => {
+                println!("Failed to read from stream: {}", e);
+                break;
             }
         }
-        Err(e) => {
-            println!("Failed to read from stream: {}", e);
-        }
     }
-
 }
 
 fn main() {
