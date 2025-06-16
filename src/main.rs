@@ -54,7 +54,8 @@ impl ResponseV0 {
             buffer.push(0); // Placeholder for tag buffer
         }
         // Add a final 0 byte to indicate the end of the version array
-        // buffer.push(0);
+        buffer.extend_from_slice(&0u32.to_be_bytes());
+        buffer.push(0);
         // Calculate message size (total buffer length - 4 bytes for message_size field)
         let message_size = (buffer.len() - 4) as u32;
         buffer[0..4].copy_from_slice(&message_size.to_be_bytes());
