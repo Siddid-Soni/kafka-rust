@@ -20,9 +20,14 @@ fn main() {
                 println!("received message of size: {:?}", msg_size);
 
                 let corr_id = &header[4..8];
-                println!("correlation id: {:?}", u32::from_be_bytes(corr_id.try_into().unwrap()));
-                stream.write_all(&[0, 0, 0, 0]).unwrap();
-                stream.write_all(corr_id).unwrap(); 
+                println!("correlation id: {:?}", i32::from_be_bytes(corr_id.try_into().unwrap()));
+
+                let res_buff = [
+                    &[0, 0, 0, 0],
+                    corr_id
+                ].concat();
+                stream.write(&res_buff).unwrap();
+                stream.flush().unwrap();
                 println!("accepted new connection");
             }
             Err(e) => {
