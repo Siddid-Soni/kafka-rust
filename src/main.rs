@@ -30,6 +30,7 @@ impl RequestV2 {
 struct ResponseV0 {
     message_size: u32,
     correlation_id: i32,
+    error_code: i16, // Assuming error_code is part of the response
     // tag_buffer: Vec<u8>
 }
 
@@ -38,6 +39,7 @@ impl ResponseV0 {
         let mut buffer = Vec::new();
         buffer.extend_from_slice(&self.message_size.to_be_bytes());
         buffer.extend_from_slice(&self.correlation_id.to_be_bytes());
+        buffer.extend_from_slice(&self.error_code.to_be_bytes());
         buffer
     }
     
@@ -50,12 +52,16 @@ fn handle_connection(stream: &mut std::net::TcpStream) {
             if size > 0 {
                 let request = RequestV2::from_bytes(&buffer[..size]);
                 println!("Received request: {:?}", request);
-                
-                // Create a response
-                let response = ResponseV0 {
+
+                let mut response = ResponseV0 {
                     message_size: size_of::<RequestV2>() as u32,
                     correlation_id: request.correlation_id,
+                    error_code: 0, 
                 };
+
+                if ![0,1,2,3,4].contains(&request.request_api_version) {
+                    response.error_code = 35;
+                }
                 
                 // Send the response back
                 let response_bytes = response.to_bytes();
