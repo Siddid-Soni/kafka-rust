@@ -1,5 +1,5 @@
 #![allow(unused_imports)]
-use std::{io::Write, net::TcpListener};
+use std::{io::{Read, Write}, net::TcpListener};
 
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -12,7 +12,17 @@ fn main() {
     for stream in listener.incoming() {
         match stream {
             Ok(mut stream) => {
-                stream.write_all(&[0, 0, 0, 0, 0, 0, 0, 7]).unwrap();
+                let mut msg_size = [0; 4];
+                stream.read(&mut msg_size).unwrap();
+                let mut header = [0; 8];
+                stream.read(&mut header).unwrap();
+                println!("received header: {:?}", header);
+                println!("received message of size: {:?}", msg_size);
+
+                let corr_id = &header[4..];
+                println!("correlation id: {:?}", u32::from_be_bytes(corr_id.try_into().unwrap()));
+                stream.write_all(&[0, 0, 0, 0]).unwrap();
+                stream.write_all(corr_id).unwrap(); 
                 println!("accepted new connection");
             }
             Err(e) => {
