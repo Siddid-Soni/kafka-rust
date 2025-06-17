@@ -62,7 +62,7 @@ async fn handle_connection(mut stream: TcpStream) {
                         let res = ResApiVersionsV4::from_request(&req);
                         Response::ApiVersions(res)
                     }
-                    0 => {
+                    75 => {
                         let req = ReqDescTopicPartitionV0::from_bytes(header, &mut bytes_mut).unwrap();
                         let res = ResDescTopicPartitionV0::from_request(&req);
                         Response::DescTopicPartition(res)
