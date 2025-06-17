@@ -134,7 +134,6 @@ impl ResDescTopicPartitionV0 {
         buffer.push(self.topics.len() as u8 + 1); // Topic count
         for topic in &self.topics {
             let topic_bytes = topic.to_bytes()?;
-            buffer.push(topic_bytes.len() as u8);
             buffer.extend_from_slice(&topic_bytes);
             buffer.push(0); // Null terminator byte
         }
