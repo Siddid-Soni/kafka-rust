@@ -74,7 +74,8 @@ impl ResponseV0 {
             message_size: 0, // This will be set later
             correlation_id: request.correlation_id,
             error_code: 0, // Default to no error
-            api_versions: vec![ApiVersion { api_key: 18, min_version: 0, max_version: 4 }], // Default to empty version array
+            api_versions: vec![ApiVersion { api_key: 18, min_version: 0, max_version: 4 },
+                            ApiVersion { api_key: 75, min_version: 0, max_version: 0 }], // Default to empty version array
         }
     }
 
