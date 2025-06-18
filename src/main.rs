@@ -60,7 +60,10 @@ async fn handle_connection(mut stream: TcpStream) {
                 let res = match header.request_api_key {
                     18 => {
                         let req = ReqApiVersionsV4::from_bytes(header, &mut bytes_mut).unwrap();
-                        let res = ResApiVersionsV4::from_request(&req);
+                        let mut res = ResApiVersionsV4::from_request(&req);
+                        if !(0..=4).contains(&req.header.request_api_version) {
+                            res.error_code = 35;
+                        }
                         println!("Received ApiVersions request: {:?}", req);
                         Response::ApiVersions(res)
                     }
@@ -86,7 +89,7 @@ async fn handle_connection(mut stream: TcpStream) {
                         continue;
                     }
                 };
-
+                
                 stream.write_u32(response_bytes.len() as u32).await.unwrap();
                 stream.write_all(&response_bytes).await.unwrap();
             }

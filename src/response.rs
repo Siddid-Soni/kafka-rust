@@ -11,10 +11,10 @@ pub struct ApiVersion {
 
 #[derive(Debug)]
 pub struct ResApiVersionsV4 {
-    correlation_id: i32,
-    error_code: i16, // Assuming error_code is part of the response
-    api_versions: Vec<ApiVersion>, // Placeholder for version array
-    throttle_time_ms: u32, // Placeholder for throttle time
+    pub correlation_id: i32,
+    pub error_code: i16, // Assuming error_code is part of the response
+    pub api_versions: Vec<ApiVersion>, // Placeholder for version array
+    pub throttle_time_ms: u32, // Placeholder for throttle time
 }
 
 impl ResApiVersionsV4 {
@@ -61,7 +61,7 @@ pub struct Partition {
 
 #[derive(Debug, Default)]
 pub struct Topic {
-    pub error_code: i16,
+    pub error_code: u16,
     pub topic_name: String,
     pub topic_id: u128,
     pub is_internal: bool,
@@ -112,6 +112,8 @@ impl Topic {
         
         // topic_operations
         buffer.extend_from_slice(&self.topic_operations.to_be_bytes());
+
+        buffer.push(0); // Null terminator byte
         Ok(buffer)
     }
 }
@@ -135,7 +137,6 @@ impl ResDescTopicPartitionV0 {
         for topic in &self.topics {
             let topic_bytes = topic.to_bytes()?;
             buffer.extend_from_slice(&topic_bytes);
-            buffer.push(0); // Null terminator byte
         }
         buffer.push(self.cursor);
         // Add a final 0 byte to indicate the end of the topics array
@@ -161,7 +162,7 @@ impl ResDescTopicPartitionV0 {
             correlation_id: request.header.correlation_id,
             throttle_time_ms: 0, // Default to no throttle
             topics: topics,
-            cursor: request.cursor,
+            cursor: 0xff,
         }
     }
 }
