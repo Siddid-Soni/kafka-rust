@@ -77,7 +77,7 @@ impl Topic {
 
         let topic_name_bytes = self.topic_name.as_bytes();
         // topic_name_len
-        buffer.push(topic_name_bytes.len() as u8);
+        buffer.push(topic_name_bytes.len() as u8 + 1);
         // topic_name
         buffer.extend_from_slice(topic_name_bytes);
         // topic_id
