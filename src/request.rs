@@ -38,11 +38,11 @@ impl ReqApiVersionsV4 {
     pub fn from_bytes(header: RequestHeaderV2, bytes: &mut BytesMut) -> Result<Self> {
         let mut req = ReqApiVersionsV4::default();
         req.header = header;
-        let client_id_len = bytes.get_u16();
-        let client_id_bytes = bytes.split_to(client_id_len as usize);
+        let client_id_len = bytes.get_u8();
+        let client_id_bytes = bytes.split_to(client_id_len as usize - 1);
         req.client_id = String::from_utf8(client_id_bytes.to_vec()).unwrap();
-        let client_version_len = bytes.get_u16();
-        let client_version_bytes = bytes.split_to(client_version_len as usize);
+        let client_version_len = bytes.get_u8();
+        let client_version_bytes = bytes.split_to(client_version_len as usize - 1);
         req.client_version = String::from_utf8(client_version_bytes.to_vec()).unwrap();
         Ok(req)
     }
@@ -61,9 +61,10 @@ impl ReqDescTopicPartitionV0 {
         let mut req = ReqDescTopicPartitionV0::default();
         req.header = header;
         let topic_count = bytes.get_u8() as usize - 1;
+        
         for _ in 0..topic_count {
             let topic_len = bytes.get_u8() as usize;
-            let topic_bytes = bytes.split_to(topic_len);
+            let topic_bytes = bytes.split_to(topic_len - 1);
             let topic = String::from_utf8(topic_bytes.to_vec()).unwrap();
             bytes.get_u8(); // Skip the null terminator byte
             req.topics.push(topic);
@@ -109,9 +110,9 @@ mod tests {
             0, 5, // client_id length
             b'h', b'e', b'l', b'l', b'o', // client_id
             0, // null terminator
-            0, 5, // client_id length
+            5, // client_id length
             b'h', b'e', b'l', b'l', b'o', 
-            0, 6, // client_version length
+            6, // client_version length
             b'w', b'o', b'r', b'l', b'd', b'!',
             0, // null terminator
         ][..]);

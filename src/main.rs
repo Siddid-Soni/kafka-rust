@@ -38,7 +38,7 @@ impl Request {
     fn from_bytes(header: RequestHeaderV2, bytes: &mut BytesMut) -> Result<Self> {
         match header.request_api_key {
             18 => Ok(Request::ApiVersions(ReqApiVersionsV4::from_bytes(header, bytes)?)),
-            0 => Ok(Request::DescTopicPartition(ReqDescTopicPartitionV0::from_bytes(header, bytes)?)),
+            75 => Ok(Request::DescTopicPartition(ReqDescTopicPartitionV0::from_bytes(header, bytes)?)),
             _ => Err(anyhow::anyhow!("Unsupported API key: {}", header.request_api_key)),
         }
     }
@@ -56,10 +56,12 @@ async fn handle_connection(mut stream: TcpStream) {
             Ok(size) => {
                 let mut bytes_mut = BytesMut::from(&buffer[..size]);
                 let header = RequestHeaderV2::from_bytes(&mut bytes_mut).unwrap();
+                println!("Received request header: {:?}", header);
                 let res = match header.request_api_key {
                     18 => {
                         let req = ReqApiVersionsV4::from_bytes(header, &mut bytes_mut).unwrap();
                         let res = ResApiVersionsV4::from_request(&req);
+                        println!("Received ApiVersions request: {:?}", req);
                         Response::ApiVersions(res)
                     }
                     75 => {
